@@ -1,0 +1,42 @@
+# ---- Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
+**/.venv/
+**/venv/
+**/env/
+pip-wheel-metadata/
+build/
+dist/
+.eggs/
+*.egg-info
+
+# SQLite (demo DB)
+*.sqlite3
+
+# ---- Node/Frontend
+node_modules/
+dist/
+*.log
+
+# ---- Env & secrets (do NOT ignore all JSON)
+.env
+.env.*
+backend/.env
+
+# service account / keys (example locations)
+**/keys/*.json
+**/*service-account*.json
+**/*credentials*.json
+*.pem
+*.key
+
+# IDE
+.DS_Store
+.idea/
+.vscode/
