@@ -9,7 +9,6 @@ type CompareMode = "generated" | "transcript";
 
 
 function transcriptToNoteObj(txt: string): SOAPNote {
-  // naive mapping: put full transcript into Subjective so changes show in Diff
   return {
     subjective: txt || "",
     objective: "",
@@ -69,7 +68,6 @@ export default function App(){
       setNote(res.note);
       setTab("editor");
   
-      // 👇 clear the transcript after a successful generate
       setTranscript("");
       if (fileInputRef.current) fileInputRef.current.value = "";
       setFile(null);

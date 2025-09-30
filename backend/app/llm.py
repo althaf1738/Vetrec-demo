@@ -3,7 +3,6 @@ import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold, GenerationConfig
 from .prompts import SOAP_SYSTEM, SOAP_USER
 
-# --- local deterministic fallback so demo never blocks ---
 def _stub_note() -> dict:
     return {
         "subjective": "Dog presented for cough, owner reports onset 2 days ago.",
@@ -38,15 +37,6 @@ def _blocked_or_empty(resp) -> bool:
     txt = _extract_text(resp)
     return (txt is None) or (fr is not None and int(fr) != 1)  # 1 is STOP in many SDKs
 
-def _safety_settings_relaxed():
-    # Start relaxed to avoid non-medical blocks; tighten later if needed.
-    return {
-        HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-        HarmCategory.HARM_CATEGORY_HARASSMENT:       HarmBlockThreshold.BLOCK_NONE,
-        HarmCategory.HARM_CATEGORY_HATE_SPEECH:      HarmBlockThreshold.BLOCK_NONE,
-        HarmCategory.HARM_CATEGORY_SEXUAL_CONTENT:   HarmBlockThreshold.BLOCK_NONE,
-    }
-
 def _gen_config(max_tokens=600, temp=0.2):
     return GenerationConfig(
         response_mime_type="application/json",
@@ -55,11 +45,9 @@ def _gen_config(max_tokens=600, temp=0.2):
     )
 
 def _compose_prompt(transcript: str) -> list:
-    # 2.x supports system_instruction; user goes in content list
     user = SOAP_USER.format(transcript=transcript[:8000])
     return [user]
 
-# --- Optional: list available models for your key (run once on startup to verify) ---
 def debug_list_models():
     try:
         models = genai.list_models()
@@ -71,7 +59,6 @@ def debug_list_models():
     except Exception as e:
         print("Model listing failed:", e)
 
-# --- Main entry used by your app ---
 async def call_llm(transcript: str) -> dict:
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
@@ -79,13 +66,10 @@ async def call_llm(transcript: str) -> dict:
 
     genai.configure(api_key=api_key)
 
-    # Prefer 2.x family; you can set MODEL_NAME in .env to gemini-2.5-flash if your key has it
     model_name = os.getenv("MODEL_NAME", "gemini-2.0-flash")
 
-    # Build model with system instruction (SOAP schema constraint lives in SOAP_SYSTEM)
     model = genai.GenerativeModel(model_name, system_instruction=SOAP_SYSTEM)
 
-    # safety = _safety_settings_relaxed()
     cfg = _gen_config(max_tokens=700, temp=0.15)
 
     # First try
